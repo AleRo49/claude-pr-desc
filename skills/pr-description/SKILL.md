@@ -12,10 +12,20 @@ Write the description a reviewer wishes every PR had: why, what, how to verify, 
 1. Read `.claude/team-kit.md` if present (language, title convention, ticket prefix, PR template rules).
 2. Look for a template: `.github/pull_request_template.md`, `.github/PULL_REQUEST_TEMPLATE/*`, `.gitlab/merge_request_templates/*`, `docs/pull_request_template.md`. If found, **fill that template** instead of the default below.
 3. Determine base branch (team-kit, else `main`/`master`) and collect:
-   - `git log --oneline <base>..HEAD`
-   - `git diff --stat <base>...HEAD`
-   - `git diff <base>...HEAD` (read it - do not summarize from the stat alone)
-4. Find the ticket: branch name (`feat/ABC-123-...`), commit messages, or ask once.
+    - `git log --oneline <base>..HEAD`
+    - `git diff --stat <base>...HEAD`
+    - `git diff <base>...HEAD` (read it - do not summarize from the stat alone)
+4. Find the ticket: branch name (`feat/ABC-123-...`), commit messages, or ask once. Never invent a ticket ID or link: if none is found, write "Ticket: none found" and ask.
+
+### Large branches
+
+If the stat shows more than ~1,500 changed lines or ~30 files, do not load the whole diff in one go:
+
+1. Start from `git diff --stat` and the commit list: they are the map.
+2. Skip noise: lock files, generated code, snapshots, vendored and minified files (e.g. `git diff <base>...HEAD -- . ':(exclude)*.lock' ':(exclude)package-lock.json' ':(exclude)dist/**'`). Mention them in one line ("lock file updated") rather than reading them.
+3. Read the rest in groups, one directory or feature area at a time (`git diff <base>...HEAD -- <path>`), and write 2-3 lines of notes per group before moving on.
+4. Read in full anything risky regardless of size: migrations, auth and permissions, payment code, public API contracts, config and env handling.
+5. Write the description from the notes. Under "Notes for reviewer", say plainly what was only skimmed, and suggest splitting the PR if it mixes unrelated changes.
 
 ## 2. Analyse
 
